@@ -196,3 +196,4 @@ await start();
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(console.warn));
 }
+import("./family-extra.js").then(m => m.initExtra(supabase)).catch(console.error);
