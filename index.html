@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f6f7f9">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>Family Hub</title>
+  <style>
+    :root{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#20242a;background:#f6f7f9}
+    *{box-sizing:border-box}body{margin:0;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom);max-width:760px;margin-inline:auto}
+    header{padding:22px 4px 12px}h1{font-size:28px;margin:0}h2{font-size:19px;margin:22px 0 10px}
+    .muted{color:#667085;font-size:13px}.card{background:white;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:12px 0}
+    input,select,textarea,button{font:inherit;width:100%;padding:12px;border:1px solid #d0d5dd;border-radius:11px;background:white}
+    button{background:#20242a;color:white;border:0;font-weight:600;cursor:pointer;margin-top:8px}
+    button.secondary{background:#eef0f3;color:#20242a}label{display:block;font-size:13px;margin:10px 0 5px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+    .item{padding:12px 0;border-bottom:1px solid #eee}.item:last-child{border:0}.links a{display:inline-block;margin:7px 10px 0 0}
+    pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;line-height:1.6}.hidden{display:none}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Family Hub</h1>
+  <div class="muted">家族のお出かけ・共有ハブ</div>
+</header>
+
+<section id="login" class="card">
+  <h2>家族ログイン</h2>
+  <label>メールアドレス</label><input id="email" type="email" autocomplete="username">
+  <label>パスワード</label><input id="password" type="password" autocomplete="current-password">
+  <button id="loginBtn">ログイン</button>
+  <p id="loginMessage" class="muted"></p>
+</section>
+
+<main id="app" class="hidden">
+  <div class="card">
+    <div class="row"><strong>お出かけ管理</strong><button id="logoutBtn" class="secondary">ログアウト</button></div>
+    <p class="muted">家族で共有する候補を登録し、天気とAIで行き先を考えます。</p>
+  </div>
+
+  <section class="card">
+    <h2>お出かけ先を登録</h2>
+    <label>施設名</label><input id="placeName" placeholder="例：こどもの国">
+    <div class="grid">
+      <div><label>エリア</label><input id="placeArea" placeholder="横浜市"></div>
+      <div><label>移動時間（分）</label><input id="driveMinutes" type="number" value="60" min="0"></div>
+    </div>
+    <label>住所（Googleマップ検索に使用）</label><input id="placeAddress" placeholder="住所または施設名">
+    <div class="grid">
+      <div><label>屋内・屋外</label><select id="placeType"><option>屋内</option><option>屋外</option><option>両方</option></select></div>
+      <div><label>カテゴリ</label><select id="placeCategory"><option>公園</option><option>遊園地</option><option>水遊び</option><option>博物館</option><option>体験</option><option>動物</option><option>その他</option></select></div>
+    </div>
+    <div class="grid">
+      <div><label>1人あたり予算（円）</label><input id="placeBudget" type="number" min="0" placeholder="無料なら0"></div>
+      <div><label>緯度</label><input id="placeLat" type="number" step="any" placeholder="天気取得用"></div>
+    </div>
+    <label>経度</label><input id="placeLon" type="number" step="any" placeholder="天気取得用">
+    <label>メモ</label><textarea id="placeMemo" rows="2"></textarea>
+    <button id="savePlace">候補を保存</button>
+    <p id="saveMessage" class="muted"></p>
+  </section>
+
+  <section class="card">
+    <h2>天気予報</h2>
+    <p class="muted">登録した緯度・経度の場所の7日間予報を表示します。</p>
+    <label>天気を確認する施設</label><select id="weatherPlace"></select>
+    <button id="weatherBtn" class="secondary">天気を取得</button>
+    <div id="weatherResult"></div>
+    <p class="muted">予報：Open-Meteo</p>
+  </section>
+
+  <section class="card">
+    <h2>AIお出かけ提案</h2>
+    <label>お出かけ日</label><input id="outingDate" type="date">
+    <div class="grid">
+      <div><label>天候条件</label><select id="outingWeather"><option>どちらでも</option><option>晴れ</option><option>雨</option><option>雪</option></select></div>
+      <div><label>車での上限（分）</label><input id="maxDrive" type="number" value="120" min="15" max="240"></div>
+    </div>
+    <label>1人あたり予算上限（円・任意）</label><input id="maxBudget" type="number" min="0" placeholder="空欄なら指定なし">
+    <button id="aiBtn">AIに提案してもらう</button>
+    <p id="aiStatus" class="muted">AIは登録済み候補をもとに提案します。1日10回まで。</p>
+    <div id="aiResult"></div>
+  </section>
+
+  <section class="card">
+    <h2>登録済みのお出かけ先</h2>
+    <div id="outingList"></div>
+  </section>
+</main>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "Family Hub",
+  "short_name": "Family Hub",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#f6f7f9",
+  "lang": "ja",
+  "description": "家族で共有するお出かけ・予定管理アプリ"
+}
