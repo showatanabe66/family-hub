@@ -1,5 +1,5 @@
-const CACHE = "family-hub-shell-v1";
-const SHELL = ["./", "./index.html", "./app.js", "./manifest.webmanifest"];
+const CACHE = "family-hub-shell-v2";
+const SHELL = ["./", "./index.html", "./app.js", "./styles.css", "./ui.js", "./family-extra.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
@@ -8,7 +8,7 @@ self.addEventListener("install", event => {
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith("family-hub-shell-") && k !== CACHE).map(k => caches.delete(k))))
   );
   self.clients.claim();
 });
@@ -18,8 +18,10 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
   event.respondWith(
     fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy));
+      if (response.ok) {
+        const copy = response.clone();
+        caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {});
+      }
       return response;
     }).catch(() => caches.match(event.request))
   );

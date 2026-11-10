@@ -34,6 +34,7 @@ async function refreshOutings() {
 
 function renderOutings(items) {
   $("outingList").innerHTML = "";
+  const selectedWeatherPlace = $("weatherPlace").value;
   $("weatherPlace").innerHTML = "";
   for (const p of items) {
     const option = document.createElement("option");
@@ -77,19 +78,24 @@ function renderOutings(items) {
     div.append(title, details, links, fav, visited, del);
     $("outingList").append(div);
   }
+  if (items.some(p => String(p.id) === selectedWeatherPlace)) $("weatherPlace").value = selectedWeatherPlace;
   if (!items.length) $("outingList").textContent = "まだ登録がありません。上から候補を登録してください。";
 }
 
 async function savePlace() {
   const name = $("placeName").value.trim();
   if (!name) return message("saveMessage", "施設名を入力してください。");
+  const numericIds = ["driveMinutes", "placeBudget", "placeLat", "placeLon"];
+  if (numericIds.some(id => !$(id).reportValidity())) return;
+  const lat = $("placeLat").value, lon = $("placeLon").value;
+  if ((lat === "") !== (lon === "")) return message("saveMessage", "緯度と経度は両方入力してください。");
   const budgetText = $("placeBudget").value;
   const latText = $("placeLat").value;
   const lonText = $("placeLon").value;
   const row = {
     name, area: $("placeArea").value.trim(),
     address: $("placeAddress").value.trim(),
-    drive_minutes: Number($("driveMinutes").value || 60),
+    drive_minutes: Number($("driveMinutes").value === "" ? 60 : $("driveMinutes").value),
     type: $("placeType").value, category: $("placeCategory").value,
     budget_per_person: budgetText === "" ? null : Number(budgetText),
     latitude: latText === "" ? null : Number(latText),
@@ -105,7 +111,7 @@ async function savePlace() {
 
 async function getWeather() {
   const items = await refreshOutings();
-  const place = items.find(p => p.id === $("weatherPlace").value);
+  const place = items.find(p => String(p.id) === $("weatherPlace").value);
   if (!place) return message("weatherResult", "先にお出かけ先を登録してください。");
   if (place.latitude == null || place.longitude == null) {
     return message("weatherResult", "この施設には緯度・経度がありません。施設情報に追加してください。");
@@ -172,6 +178,7 @@ async function start() {
 }
 
 $("loginBtn").onclick = async () => {
+  if (!$("email").reportValidity() || !$("email").value || !$("password").value) return message("loginMessage", "メールアドレスとパスワードを入力してください。");
   message("loginMessage", "ログイン中...");
   const { error } = await supabase.auth.signInWithPassword({
     email: $("email").value.trim(), password: $("password").value
@@ -187,10 +194,20 @@ $("aiBtn").onclick = askAI;
 supabase.auth.onAuthStateChange((_event, session) => {
   loginBox.classList.toggle("hidden", !!session);
   appBox.classList.toggle("hidden", !session);
-  if (session) refreshOutings().catch(e => console.error(e));
+  if (session) setTimeout(() => refreshOutings().catch(e => console.error(e)), 0);
 });
 
-$("outingDate").value = new Date().toISOString().slice(0,10);
+$("outingDate").value = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo" }).format(new Date());
+["loginBtn", "logoutBtn", "savePlace", "weatherBtn"].forEach(id => {
+  const button = $(id), action = button.onclick;
+  button.onclick = async () => {
+    button.disabled = true;
+    try { await action(); }
+    catch (error) { message(({loginBtn:"loginMessage", logoutBtn:"loginMessage", savePlace:"saveMessage", weatherBtn:"weatherResult"})[id], `通信できませんでした：${error.message}`); }
+    finally { button.disabled = false; }
+  };
+});
+$("password").addEventListener("keydown", event => { if (event.key === "Enter") $("loginBtn").click(); });
 await start();
 
 if ("serviceWorker" in navigator) {
