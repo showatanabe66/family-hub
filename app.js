@@ -5,8 +5,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
  * URL と Publishable key を設定してください。
  * service_role key は絶対にここへ貼らないでください。
  */
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY";
+const SUPABASE_URL = "https://aaozokleopirgsuaubnz.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_5jE4ze4_hRxTIT0ybKEImQ_OvKGt5S5";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const $ = (id) => document.getElementById(id);
