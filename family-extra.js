@@ -10,46 +10,22 @@ export function initExtra(supabase) {
   wrap.id = "familyExtra";
 
   wrap.innerHTML = `
-    <section class="card view-panel" data-panel="schedules">
+    <section class="card view-panel" data-panel="schedules" hidden>
       <h2>📅 家族の予定</h2>
       <div id="fxScheduleList" class="hub-list" aria-live="polite"></div>
-      <details><summary>＋ 予定を追加</summary>
-      <label>予定名</label>
-      <input id="fxScheduleName" placeholder="例：運動会">
-      <label>日付</label>
-      <input id="fxScheduleDate" type="date">
-      <label>時間（任意）</label>
-      <input id="fxScheduleTime" type="time">
-      <label>対象者</label>
-      <input id="fxSchedulePerson" value="家族全員">
-      <button id="fxScheduleSave">予定を追加</button>
-      <p class="muted" id="fxScheduleMsg" role="status"></p></details>
+
     </section>
 
     <section class="card view-panel" data-panel="shopping" hidden>
       <h2>🛒 買い物リスト</h2>
       <div id="fxShopList" class="hub-list" aria-live="polite"></div>
-      <details><summary>＋ 買うものを追加</summary>
-      <label>買うもの</label>
-      <input id="fxShopName" placeholder="例：牛乳">
-      <label>メモ（任意）</label>
-      <input id="fxShopMemo" placeholder="例：1リットル">
-      <button id="fxShopSave">買い物を追加</button>
-      <p class="muted" id="fxShopMsg" role="status"></p></details>
+
     </section>
 
     <section class="card view-panel" data-panel="tasks" hidden>
       <h2>✅ 家族のタスク</h2>
       <div id="fxTaskList" class="hub-list" aria-live="polite"></div>
-      <details><summary>＋ タスクを追加</summary>
-      <label>やること</label>
-      <input id="fxTaskName" placeholder="例：ゴミ出し">
-      <label>担当者</label>
-      <input id="fxTaskPerson" value="家族全員">
-      <label>期限（任意）</label>
-      <input id="fxTaskDate" type="date">
-      <button id="fxTaskSave">タスクを追加</button>
-      <p class="muted" id="fxTaskMsg" role="status"></p></details>
+
     </section>
   `;
 
@@ -101,7 +77,7 @@ export function initExtra(supabase) {
     list.replaceChildren();
 
     if (!data || data.length === 0) {
-      const empty = makeText("p", "まだ登録がありません。下の「＋」から追加しましょう。");
+      const empty = makeText("p", "まだ登録がありません。「＋ 追加」タブから登録しましょう。");
       empty.className = "empty-state";
       list.append(empty);
       return;

@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f4f7f2">
-  <meta name="description" content="家族の予定、買い物、やること、お出かけをひとつに。Family Hub">
+  <meta name="description" content="家族の予定、買い物、やること、お出かけをひとつに。Watanabe Family Hub">
   <link rel="manifest" href="./manifest.webmanifest">
-  <title>Family Hub</title>
+  <title>Watanabe Family Hub</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 <header class="site-header">
-  <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">⌂</span><span>Family Hub<small>家族の毎日を、ひとつに。</small></span></a>
+  <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">⌂</span><span>Watanabe Family Hub<small>家族の毎日を、ひとつに。</small></span></a>
   <span class="header-date" id="todayLabel"></span>
 </header>
 
@@ -24,39 +24,21 @@
 </section>
 
 <main id="app" class="hidden">
-  <section class="welcome"><div><span class="eyebrow">OUR FAMILY, EVERY DAY</span><h1>今日も、家族のいい一日。</h1><p>小さな用事から、楽しみな予定まで。</p></div><span class="welcome-art" aria-hidden="true">⌂</span></section>
   <nav class="hub-nav" aria-label="機能を選ぶ">
-    <button type="button" data-view="schedules" aria-pressed="true">予定</button>
+    <button type="button" data-view="outings" aria-pressed="true">お出かけ</button>
+    <button type="button" data-view="schedules" aria-pressed="false">予定</button>
     <button type="button" data-view="shopping" aria-pressed="false">買い物</button>
     <button type="button" data-view="tasks" aria-pressed="false">タスク</button>
-    <button type="button" data-view="outings" aria-pressed="false">お出かけ</button>
-  </nav><div id="outingsPanel" class="view-panel hidden">
+    <button type="button" data-view="add" aria-pressed="false">＋ 追加</button>
+  </nav>
+  <section class="welcome"><div><span class="eyebrow">OUR FAMILY, EVERY DAY</span><h1>今日も、家族のいい一日。</h1><p>小さな用事から、楽しみな予定まで。</p></div><span class="welcome-art" aria-hidden="true">⌂</span></section>
+<div id="outingsPanel" class="view-panel">
   <div class="card">
     <div class="row"><strong>お出かけ管理</strong><button id="logoutBtn" class="secondary">ログアウト</button></div>
     <p class="muted">家族で共有する候補を登録し、天気とAIで行き先を考えます。</p>
   </div>
 
-  <section class="card">
-    <details><summary>＋ お出かけ先を登録</summary>
-    <label>施設名</label><input id="placeName" placeholder="例：こどもの国">
-    <div class="grid">
-      <div><label>エリア</label><input id="placeArea" placeholder="横浜市"></div>
-      <div><label>移動時間（分）</label><input id="driveMinutes" type="number" value="60" min="0"></div>
-    </div>
-    <label>住所（Googleマップ検索に使用）</label><input id="placeAddress" placeholder="住所または施設名">
-    <div class="grid">
-      <div><label>屋内・屋外</label><select id="placeType"><option>屋内</option><option>屋外</option><option>両方</option></select></div>
-      <div><label>カテゴリ</label><select id="placeCategory"><option>公園</option><option>遊園地</option><option>水遊び</option><option>博物館</option><option>体験</option><option>動物</option><option>その他</option></select></div>
-    </div>
-    <div class="grid">
-      <div><label>1人あたり予算（円）</label><input id="placeBudget" type="number" min="0" placeholder="無料なら0"></div>
-      <div><label>緯度</label><input id="placeLat" type="number" step="any" min="-90" max="90" placeholder="天気取得用"></div>
-    </div>
-    <label>経度</label><input id="placeLon" type="number" step="any" min="-180" max="180" placeholder="天気取得用">
-    <label>メモ</label><textarea id="placeMemo" rows="2"></textarea>
-    <button id="savePlace">候補を保存</button>
-    <p id="saveMessage" class="muted" role="status"></p></details>
-  </section>
+
 
   <section class="card">
     <h2>天気予報</h2>
@@ -84,7 +66,66 @@
     <h2>登録済みのお出かけ先</h2>
     <div id="outingList"></div>
   </section>
-</div></main>
+</div>
+  <section id="addPanel" class="view-panel" data-panel="add" hidden>
+    <h2>家族で共有するものを追加</h2>
+    <p class="muted">登録した内容は、それぞれのタブで確認できます。</p>
+    <section class="card">
+      <details open><summary>＋ 予定を追加</summary>
+      <label>予定名</label>
+      <input id="fxScheduleName" placeholder="例：運動会">
+      <label>日付</label>
+      <input id="fxScheduleDate" type="date">
+      <label>時間（任意）</label>
+      <input id="fxScheduleTime" type="time">
+      <label>対象者</label>
+      <input id="fxSchedulePerson" value="家族全員">
+      <button id="fxScheduleSave">予定を追加</button>
+      <p class="muted" id="fxScheduleMsg" role="status"></p></details>
+    </section>
+    <section class="card">
+      <details open><summary>＋ 買うものを追加</summary>
+      <label>買うもの</label>
+      <input id="fxShopName" placeholder="例：牛乳">
+      <label>メモ（任意）</label>
+      <input id="fxShopMemo" placeholder="例：1リットル">
+      <button id="fxShopSave">買い物を追加</button>
+      <p class="muted" id="fxShopMsg" role="status"></p></details>
+    </section>
+    <section class="card">
+      <details open><summary>＋ タスクを追加</summary>
+      <label>やること</label>
+      <input id="fxTaskName" placeholder="例：ゴミ出し">
+      <label>担当者</label>
+      <input id="fxTaskPerson" value="家族全員">
+      <label>期限（任意）</label>
+      <input id="fxTaskDate" type="date">
+      <button id="fxTaskSave">タスクを追加</button>
+      <p class="muted" id="fxTaskMsg" role="status"></p></details>
+    </section>
+  <section class="card">
+    <details><summary>＋ お出かけ先を登録</summary>
+    <label>施設名</label><input id="placeName" placeholder="例：こどもの国">
+    <div class="grid">
+      <div><label>エリア</label><input id="placeArea" placeholder="横浜市"></div>
+      <div><label>移動時間（分）</label><input id="driveMinutes" type="number" value="60" min="0"></div>
+    </div>
+    <label>住所（Googleマップ検索に使用）</label><input id="placeAddress" placeholder="住所または施設名">
+    <div class="grid">
+      <div><label>屋内・屋外</label><select id="placeType"><option>屋内</option><option>屋外</option><option>両方</option></select></div>
+      <div><label>カテゴリ</label><select id="placeCategory"><option>公園</option><option>遊園地</option><option>水遊び</option><option>博物館</option><option>体験</option><option>動物</option><option>その他</option></select></div>
+    </div>
+    <div class="grid">
+      <div><label>1人あたり予算（円）</label><input id="placeBudget" type="number" min="0" placeholder="無料なら0"></div>
+      <div><label>緯度</label><input id="placeLat" type="number" step="any" min="-90" max="90" placeholder="天気取得用"></div>
+    </div>
+    <label>経度</label><input id="placeLon" type="number" step="any" min="-180" max="180" placeholder="天気取得用">
+    <label>メモ</label><textarea id="placeMemo" rows="2"></textarea>
+    <button id="savePlace">候補を保存</button>
+    <p id="saveMessage" class="muted" role="status"></p></details>
+  </section>
+  </section>
+</main>
 <script type="module" src="./app.js"></script>
 <script type="module" src="./ui.js"></script>
 

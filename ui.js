@@ -1,6 +1,6 @@
 const date = new Date();
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('ja-JP', {timeZone:'Asia/Tokyo',month:'long',day:'numeric',weekday:'short'}).format(date);
-let currentView = 'schedules';
+let currentView = 'outings';
 function showView(view) {
   currentView = view;
   document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
@@ -9,6 +9,7 @@ function showView(view) {
 }
 document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
 document.addEventListener('family-panels-ready', () => showView(currentView));
+showView(currentView);
 // Associate existing labels with their controls, including dynamically created forms.
 function labelControls() {
   document.querySelectorAll('label:not([for])').forEach(label => {
