@@ -1,4 +1,4 @@
-import { validateSnapshot } from './validate.mjs';
+import { validateSnapshot, SnapshotValidationError } from './validate.mjs';
 const reply = (status: number, body: object) => new Response(JSON.stringify(body), {
   status, headers: {'Content-Type':'application/json', 'Cache-Control':'no-store'},
 });
@@ -22,7 +22,12 @@ Deno.serve(async request => {
     for (const chunk of chunks) { bytes.set(chunk,offset); offset+=chunk.length; }
     let snapshot;
     try { snapshot = validateSnapshot(JSON.parse(new TextDecoder().decode(bytes))); }
-    catch { return reply(400,{error:'Invalid snapshot. Check the JSON format, date, time and item limits.'}); }
+    catch (error) {
+      if (error instanceof SnapshotValidationError) return reply(400,{
+        error:'Invalid snapshot', field:error.field, hint:error.message, actual_type:error.actual_type,
+      });
+      return reply(400,{error:'Invalid JSON',hint:'本文は有効なJSONにしてください。'});
+    }
     const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
     const hash = Array.from(new Uint8Array(digest), b=>b.toString(16).padStart(2,'0')).join('');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

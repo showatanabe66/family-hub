@@ -28,3 +28,20 @@ test('keeps text as data, including quotes and markup',()=>{
  const name='<script>"quoted" & text</script>';
  assert.equal(validateSnapshot(wrap({shopping:[{name}]}),now).sources.shopping[0].name,name);
 });
+test('reports exact field without echoing private item values',()=>{
+ const cases=[
+  [{...wrap({shopping:[]}),version:'1'},'version'],
+  [{...wrap({shopping:[]}),captured_at:'2026年11月11日'},'captured_at'],
+  [wrap({shopping:{name:'private-name'}}),'sources.shopping'],
+  [wrap({shopping:['private-name']}),'sources.shopping[0]'],
+  [wrap({shopping:[{name:{title:'private-name'}}]}),'sources.shopping[0].name'],
+ ];
+ for(const [payload,field] of cases){
+  assert.throws(()=>validateSnapshot(payload,now),error=>{
+   assert.equal(error.field,field);
+   assert.ok(!error.message.includes('private-name'));
+   assert.ok(error.actual_type);
+   return true;
+  });
+ }
+});
