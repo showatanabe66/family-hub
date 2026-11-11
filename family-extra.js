@@ -1,3 +1,4 @@
+import { initAppleSync, refreshImports, importedItems, clearImports } from "./apple-sync.js";
 
 // Family Hub: 予定・買い物・タスク管理
 export function initExtra(supabase) {
@@ -30,6 +31,7 @@ export function initExtra(supabase) {
   `;
 
   main.append(wrap);
+  initAppleSync(supabase);
 
   const $ = id => document.getElementById(id);
 
@@ -68,22 +70,21 @@ export function initExtra(supabase) {
       .select("*")
       .order(table === "schedules" ? "date" : "created_at", { ascending: table === "schedules" });
 
-    if (error) {
-      showError(msgId, error);
-      return;
-    }
+    if (error) showError(msgId, error);
+    const combined = [...(data || []), ...importedItems(table)];
+    if (table === "schedules") combined.sort((a,b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
 
     const list = $(listId);
     list.replaceChildren();
 
-    if (!data || data.length === 0) {
+    if (combined.length === 0) {
       const empty = makeText("p", "まだ登録がありません。「＋ 追加」タブから登録しましょう。");
       empty.className = "empty-state";
       list.append(empty);
       return;
     }
 
-    data.forEach(item => list.append(render(item)));
+    combined.forEach(item => list.append(item.imported ? renderImported(item) : render(item)));
   }
 
   async function add(table, values, msgId, clearIds, reload) {
@@ -121,6 +122,18 @@ export function initExtra(supabase) {
 
     if (error) throw error;
     await reload();
+  }
+
+  function renderImported(item) {
+    const el = document.createElement("div");
+    el.className = "item imported-item";
+    const title = makeText("strong", `${item.done ? "✓ " : ""}${item.name}`);
+    if (item.done) title.style.textDecoration = "line-through";
+    el.append(title);
+    el.append(makeText("p", [item.date, item.time, item.source_name || "Appleから同期"].filter(Boolean).join(" ・ ")));
+    if (item.memo) el.append(makeText("p", item.memo));
+    el.append(makeText("small", "同期データ：変更・完了はカレンダー／リマインダーで操作してください。"));
+    return el;
   }
 
   function renderSchedule(item) {
@@ -202,6 +215,7 @@ export function initExtra(supabase) {
 
     if (!session) return;
 
+    await refreshImports(supabase);
     await Promise.all([
       refreshSchedules(),
       refreshShopping(),
@@ -273,6 +287,7 @@ export function initExtra(supabase) {
     }
 
     if (event === "SIGNED_OUT") {
+      clearImports();
       ["fxScheduleList", "fxShopList", "fxTaskList"]
         .forEach(id => $(id).replaceChildren());
     }
@@ -293,6 +308,14 @@ export function initExtra(supabase) {
       finally { button.disabled = false; }
     };
   });
+  document.addEventListener("apple-sync-refresh", () => refreshAll().catch(console.error));
+  let refreshing = false;
+  setInterval(async () => {
+    if (document.hidden || refreshing) return;
+    refreshing = true;
+    try { await refreshAll(); } catch(error) { console.error(error); }
+    finally { refreshing = false; }
+  }, 60000);
   document.dispatchEvent(new Event("family-panels-ready"));
   refreshAll().catch(console.error);
 }

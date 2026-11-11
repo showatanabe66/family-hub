@@ -7,3 +7,5 @@
 #addPanel details{margin-top:0}
 #addPanel>h2{margin-bottom:6px}
 @media(max-width:600px){.site-header{gap:10px;flex-wrap:wrap}.brand{font-size:19px;letter-spacing:-.5px}.brand-mark{width:38px;height:38px;flex-shrink:0}.header-date{margin-left:auto}.hub-nav button{font-size:12px;padding-inline:2px}}
+
+.imported-item small{font-size:11px;color:#718075}.imported-item{border-left:3px solid #a9c6a4;padding-left:14px}#appleSyncKey:empty{display:none}

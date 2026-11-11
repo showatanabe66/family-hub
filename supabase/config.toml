@@ -1,0 +1,3 @@
+[functions.apple-sync]
+# This endpoint verifies its dedicated device key inside the function.
+verify_jwt = false
