@@ -54,16 +54,18 @@
   </details></section>
 
   <section id="outingAiPanel" class="card outing-tool">
-    <details><summary>AIと行き先を考える <span>候補から提案</span></summary>
-    <label>お出かけ日</label><input id="outingDate" type="date">
+    <details><summary>AIと行き先を考える <span>ネット検索＋天気</span></summary>
+    <p class="ai-family-conditions">東戸塚駅周辺から車で片道約2時間以内 · お子さん4歳・6歳</p>
+    <p class="muted">未登録の施設もネットで探し、現地の天気・年齢条件・営業情報を確認して、最大3件を提案します。</p>
     <div class="grid">
-      <div><label>天候条件</label><select id="outingWeather"><option>どちらでも</option><option>晴れ</option><option>雨</option><option>雪</option></select></div>
-      <div><label>車での上限（分）</label><input id="maxDrive" type="number" value="120" min="15" max="240"></div>
+      <div><label for="outingDate">お出かけ日</label><input id="outingDate" type="date" required></div>
+      <div><label for="maxBudget">1人あたり予算上限（任意）</label><input id="maxBudget" type="number" min="0" max="1000000" placeholder="指定なし"></div>
     </div>
-    <label>1人あたり予算上限（円・任意）</label><input id="maxBudget" type="number" min="0" placeholder="空欄なら指定なし">
-    <button id="aiBtn">AIに提案してもらう</button>
-    <p id="aiStatus" class="muted">AIは登録済み候補をもとに提案します。1日10回まで。</p>
-    <div id="aiResult"></div>
+    <p class="muted">天気は自動で確認します。雨・雪・強風などの予報では屋内施設に絞ります。予報を取得できる今日から15日後までが対象です。</p>
+    <button id="aiBtn" type="button">ネットと天気から3つ提案してもらう</button>
+    <p id="aiStatus" class="muted" role="status">AI検索は1日10回まで。車の時間は渋滞を含まない目安です。</p>
+    <div id="aiResult" aria-busy="false"></div>
+    <details class="ai-setup-help"><summary>AI提案の設定・利用について</summary><p class="muted">OpenAI APIの利用設定が必要です。ChatGPTの契約とは別にAPIの利用料金が発生します。<a href="./docs/ai-outing-setup.md" target="_blank" rel="noopener">初期設定の手順</a></p></details>
   </details></section>
 
 </div>

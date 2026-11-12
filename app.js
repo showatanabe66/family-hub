@@ -1,3 +1,4 @@
+import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js";
 import { createOutingBrowser } from "./outing-browser.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -135,32 +136,32 @@ async function getWeather() {
   } catch (e) { message("weatherResult", `取得できませんでした：${e.message}`); }
 }
 
+async function saveAiCandidate(place) {
+  const items=await refreshOutings();
+  if(items.some(item=>item.name.normalize("NFKC").trim()===place.name.normalize("NFKC").trim()))return "同じ名前の候補が登録されています。";
+  const {error}=await supabase.from("outings").insert({name:place.name,area:place.area,address:place.address,type:place.type,category:"その他",drive_minutes:place.drive_minutes,budget_per_person:place.budget_per_person,latitude:place.latitude,longitude:place.longitude,memo:[place.child_reason,place.age_notes,place.official_url].filter(Boolean).join("\n")});
+  if(error)throw error;
+  await refreshOutings();return "家族のお出かけ候補に保存しました。";
+}
 async function askAI() {
-  $("aiBtn").disabled = true;
-  message("aiStatus", "候補と条件を確認してAIに依頼しています...");
-  $("aiResult").textContent = "";
+  if(!$("outingDate").reportValidity()||!$("outingDate").value||!$("maxBudget").reportValidity())return;
+  $("aiBtn").disabled=true;
+  $("aiResult").setAttribute("aria-busy","true");
+  $("aiResult").replaceChildren();
+  message("aiStatus","ネットで施設情報を検索し、現地の天気と車の所要時間を確認しています。1〜2分ほどかかることがあります。");
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const token = sessionData.session?.access_token;
-    if (!token) throw new Error("ログインし直してください。");
-    const { data, error } = await supabase.functions.invoke("ai-outing", {
-      body: {
-        date: $("outingDate").value,
-        weather: $("outingWeather").value,
-        maxDriveMinutes: Number($("maxDrive").value || 120),
-        budget: $("maxBudget").value === "" ? null : Number($("maxBudget").value)
-      }
-    });
-    if (error) throw error;
-    if (data?.error) throw new Error(data.error);
-    $("aiResult").innerHTML = "";
-    const pre = document.createElement("pre");
-    pre.textContent = data.result;
-    $("aiResult").append(pre);
-    message("aiStatus", "提案ができました。");
-  } catch (e) {
-    message("aiStatus", `AI提案を利用できません：${e.message || "設定を確認してください。"}`);
-  } finally { $("aiBtn").disabled = false; }
+    const {data,error}=await supabase.functions.invoke("ai-outing",{body:{date:$("outingDate").value,budget:$("maxBudget").value===""?null:Number($("maxBudget").value)}});
+    if(error){
+      let detail;
+      try{detail=await error.context?.json();}catch{/* Use the normal connection error below. */}
+      throw new Error(detail?.error||"AI提案に接続できませんでした。ログイン状態と通信を確認して、再実行してください。");
+    }
+    if(data?.error)throw new Error(data.error);
+    if(!Array.isArray(data?.recommendations))throw new Error("検索結果を読み取れませんでした。");
+    renderAiRecommendations($("aiResult"),data,saveAiCandidate);
+    message("aiStatus",data.message);
+  }catch(error){message("aiStatus",error.message||"提案を作成できませんでした。");}
+  finally{$("aiBtn").disabled=false;$("aiResult").setAttribute("aria-busy","false");}
 }
 
 async function start() {
@@ -195,7 +196,11 @@ supabase.auth.onAuthStateChange((_event, session) => {
   else { renderOutings([]); message("weatherResult", ""); message("aiResult", ""); message("outingMessage", ""); }
 });
 
-$("outingDate").value = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo" }).format(new Date());
+const outingDateLimits = dateLimits();
+$("outingDate").min = outingDateLimits.min;
+$("outingDate").max = outingDateLimits.max;
+$("outingDate").value = outingDateLimits.min;
+$("outingDate").required = true;
 ["loginBtn", "logoutBtn", "savePlace", "weatherBtn"].forEach(id => {
   const button = $(id), action = button.onclick;
   button.onclick = async () => {

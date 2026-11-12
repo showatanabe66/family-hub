@@ -1,5 +1,5 @@
-const CACHE = "family-hub-shell-v9";
-const SHELL = ["./", "./index.html", "./app.js", "./outing-browser.js", "./styles.css", "./ui.js", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
+const CACHE = "family-hub-shell-v10";
+const SHELL = ["./", "./index.html", "./app.js", "./ai-outing-ui.js", "./outing-browser.js", "./styles.css", "./ui.js", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
