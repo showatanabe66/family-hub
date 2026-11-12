@@ -1,3 +1,4 @@
+import { createScheduleCalendar } from "./schedule-calendar.js";
 import { initAppleSync, refreshImports, importedItems, clearImports } from "./apple-sync.js";
 
 // Family Hub: 予定・買い物・タスク管理
@@ -74,6 +75,7 @@ export function initExtra(supabase) {
     const combined = [...(data || []), ...importedItems(table)];
     if (table === "schedules") combined.sort((a,b) => `${a.date} ${a.time || ""}`.localeCompare(`${b.date} ${b.time || ""}`));
 
+    if (table === "schedules") { scheduleCalendar.update(combined); return; }
     const list = $(listId);
     list.replaceChildren();
 
@@ -152,6 +154,8 @@ export function initExtra(supabase) {
 
     return el;
   }
+
+  const scheduleCalendar = createScheduleCalendar($("fxScheduleList"), item => item.imported ? renderImported(item) : renderSchedule(item));
 
   function renderCheckItem(table, item, reload, detail) {
     const el = document.createElement("div");
@@ -288,7 +292,8 @@ export function initExtra(supabase) {
 
     if (event === "SIGNED_OUT") {
       clearImports();
-      ["fxScheduleList", "fxShopList", "fxTaskList"]
+      scheduleCalendar.reset();
+      ["fxShopList", "fxTaskList"]
         .forEach(id => $(id).replaceChildren());
     }
   });
