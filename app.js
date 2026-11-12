@@ -1,3 +1,4 @@
+import { createOutingBrowser } from "./outing-browser.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /*
@@ -32,54 +33,48 @@ async function refreshOutings() {
   return data || [];
 }
 
+function addOuting() {
+  document.querySelector('[data-view="add"]').click();
+  $("placeName").closest("details").open = true;
+  $("placeName").focus();
+}
+function openOutingSection(id) {
+  const section = $(id);
+  section.querySelector("details").open = true;
+  section.scrollIntoView({behavior:"smooth",block:"start"});
+}
+const outingBrowser = createOutingBrowser($("outingList"), {
+  map:mapSearchUrl, route:mapDirectionsUrl, add:addOuting,
+  error:text=>message("outingMessage",text),
+  update:async (place,field,value)=>{
+    message("outingMessage", "");
+    const {error} = await supabase.from("outings").update({[field]:value}).eq("id",place.id);
+    if(error)throw error;
+    await refreshOutings();
+  },
+  remove:async place=>{
+    if(!confirm(`${place.name}を削除しますか？`))return;
+    const {error} = await supabase.from("outings").delete().eq("id",place.id);
+    if(error)throw error;
+    await refreshOutings();
+  },
+  weather:async place=>{
+    $("weatherPlace").value=String(place.id);
+    openOutingSection("outingWeatherPanel");
+    $("weatherBtn").click();
+  },
+});
+$("outingAdd").onclick=addOuting;
+$("outingWeatherShortcut").onclick=()=>openOutingSection("outingWeatherPanel");
+$("outingAiShortcut").onclick=()=>openOutingSection("outingAiPanel");
 function renderOutings(items) {
-  $("outingList").innerHTML = "";
-  const selectedWeatherPlace = $("weatherPlace").value;
-  $("weatherPlace").innerHTML = "";
-  for (const p of items) {
-    const option = document.createElement("option");
-    option.value = p.id;
-    option.textContent = p.name;
-    $("weatherPlace").append(option);
-
-    const div = document.createElement("div");
-    div.className = "item";
-    const title = document.createElement("strong");
-    title.textContent = `${p.favorite ? "★ " : ""}${p.name}`;
-    const details = document.createElement("div");
-    details.className = "muted";
-    details.textContent = `${p.area || "エリア未登録"} ・ ${p.type} ・ 車${p.drive_minutes}分 ${p.visited ? "・訪問済み" : ""}`;
-    const links = document.createElement("div");
-    links.className = "links";
-    const map = document.createElement("a");
-    map.href = mapSearchUrl(p); map.target = "_blank"; map.rel = "noopener"; map.textContent = "地図を見る";
-    const route = document.createElement("a");
-    route.href = mapDirectionsUrl(p); route.target = "_blank"; route.rel = "noopener"; route.textContent = "ルート";
-    const fav = document.createElement("button");
-    fav.className = "secondary"; fav.textContent = p.favorite ? "お気に入り解除" : "お気に入り";
-    fav.onclick = async () => {
-      const { error } = await supabase.from("outings").update({favorite: !p.favorite}).eq("id", p.id);
-      if (error) alert(error.message); else await refreshOutings();
-    };
-    const visited = document.createElement("button");
-    visited.className = "secondary"; visited.textContent = p.visited ? "未訪問に戻す" : "訪問済みにする";
-    visited.onclick = async () => {
-      const { error } = await supabase.from("outings").update({visited: !p.visited}).eq("id", p.id);
-      if (error) alert(error.message); else await refreshOutings();
-    };
-    const del = document.createElement("button");
-    del.className = "secondary"; del.textContent = "削除";
-    del.onclick = async () => {
-      if (!confirm(`${p.name}を削除しますか？`)) return;
-      const { error } = await supabase.from("outings").delete().eq("id", p.id);
-      if (error) alert(error.message); else await refreshOutings();
-    };
-    links.append(map, route);
-    div.append(title, details, links, fav, visited, del);
-    $("outingList").append(div);
+  const selected = $("weatherPlace").value;
+  $("weatherPlace").replaceChildren();
+  for(const place of items){
+    const option=document.createElement("option");option.value=String(place.id);option.textContent=place.name;$("weatherPlace").append(option);
   }
-  if (items.some(p => String(p.id) === selectedWeatherPlace)) $("weatherPlace").value = selectedWeatherPlace;
-  if (!items.length) $("outingList").textContent = "まだ登録がありません。上から候補を登録してください。";
+  if(items.some(place=>String(place.id)===selected))$("weatherPlace").value=selected;
+  outingBrowser.update(items);
 }
 
 async function savePlace() {
@@ -114,7 +109,7 @@ async function getWeather() {
   const place = items.find(p => String(p.id) === $("weatherPlace").value);
   if (!place) return message("weatherResult", "先にお出かけ先を登録してください。");
   if (place.latitude == null || place.longitude == null) {
-    return message("weatherResult", "この施設には緯度・経度がありません。施設情報に追加してください。");
+    return message("weatherResult", "この施設には緯度・経度が登録されていないため、天気を取得できません。");
   }
   message("weatherResult", "天気を取得中...");
   const url = new URL("https://api.open-meteo.com/v1/forecast");
@@ -133,7 +128,7 @@ async function getWeather() {
     $("weatherResult").innerHTML = "";
     data.daily.time.forEach((d,i) => {
       const line = document.createElement("div");
-      line.className = "item";
+      line.className = "weather-day";
       line.textContent = `${d}：${labels(data.daily.weather_code[i])}／${data.daily.temperature_2m_min[i]}〜${data.daily.temperature_2m_max[i]}℃／降水確率 ${data.daily.precipitation_probability_max[i] ?? "不明"}%`;
       $("weatherResult").append(line);
     });
@@ -197,6 +192,7 @@ supabase.auth.onAuthStateChange((_event, session) => {
   appBox.classList.toggle("hidden", !session);
   $("logoutBtn").hidden = !session;
   if (session) setTimeout(() => refreshOutings().catch(e => console.error(e)), 0);
+  else { renderOutings([]); message("weatherResult", ""); message("aiResult", ""); message("outingMessage", ""); }
 });
 
 $("outingDate").value = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Tokyo" }).format(new Date());
