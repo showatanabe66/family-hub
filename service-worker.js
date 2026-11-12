@@ -1,4 +1,4 @@
-const CACHE = "family-hub-shell-v6";
+const CACHE = "family-hub-shell-v7";
 const SHELL = ["./", "./index.html", "./app.js", "./styles.css", "./ui.js", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
