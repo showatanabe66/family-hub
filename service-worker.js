@@ -1,8 +1,8 @@
-const CACHE = "family-hub-shell-v10";
-const SHELL = ["./", "./index.html", "./app.js", "./ai-outing-ui.js", "./outing-browser.js", "./styles.css", "./ui.js", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
+const CACHE = "family-hub-shell-v11";
+const SHELL = ["./", "./index.html", "./app.js?v=ai-search-2", "./ai-outing-ui.js", "./outing-browser.js", "./styles.css?v=ai-search-2", "./ui.js?v=ai-search-2", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(path => new Request(new URL(path, self.location.href), {cache: "reload"})))));
   self.skipWaiting();
 });
 
@@ -17,7 +17,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
   event.respondWith(
-    fetch(event.request).then(response => {
+    fetch(event.request, {cache: "no-cache"}).then(response => {
       if (response.ok) {
         const copy = response.clone();
         caches.open(CACHE).then(cache => cache.put(event.request, copy)).catch(() => {});

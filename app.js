@@ -214,6 +214,6 @@ $("password").addEventListener("keydown", event => { if (event.key === "Enter") 
 await start();
 
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js").catch(console.warn));
+  window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js", {updateViaCache: "none"}).catch(console.warn));
 }
 import("./family-extra.js").then(m => m.initExtra(supabase)).catch(console.error);
