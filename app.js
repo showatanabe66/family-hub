@@ -172,6 +172,7 @@ async function start() {
   const { data: { session } } = await supabase.auth.getSession();
   loginBox.classList.toggle("hidden", !!session);
   appBox.classList.toggle("hidden", !session);
+  $("logoutBtn").hidden = !session;
   if (session) {
     try { await refreshOutings(); } catch (e) { alert(`データ読込エラー：${e.message}`); }
   }
@@ -194,6 +195,7 @@ $("aiBtn").onclick = askAI;
 supabase.auth.onAuthStateChange((_event, session) => {
   loginBox.classList.toggle("hidden", !!session);
   appBox.classList.toggle("hidden", !session);
+  $("logoutBtn").hidden = !session;
   if (session) setTimeout(() => refreshOutings().catch(e => console.error(e)), 0);
 });
 

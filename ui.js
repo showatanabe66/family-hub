@@ -20,8 +20,3 @@ function labelControls() {
 }
 labelControls();
 document.addEventListener('family-panels-ready', labelControls);
-// Keep account controls available from every section.
-const tools = document.createElement('div');
-tools.className = 'session-tools';
-tools.append(document.getElementById('logoutBtn'));
-document.getElementById('app').append(tools);
