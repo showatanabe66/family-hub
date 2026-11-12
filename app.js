@@ -1,4 +1,4 @@
-import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js";
+import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js?v=ai-weather-3";
 import { createOutingBrowser } from "./outing-browser.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 

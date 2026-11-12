@@ -3,7 +3,7 @@
 ## 現在の実装
 
 - 出発地：東戸塚駅周辺。子供：4歳・6歳。
-- 取得日：今日から15日後まで。Open-Meteoの現地予報が確認できる日付だけ。
+- 取得日：今日から15日後まで。Open-MeteoまたはMET Norwayの現地予報が確認できる日付だけ。
 - OpenAI Responses APIのweb_searchで、登録済み施設に限定せず、公式施設情報と対象日の営業・年齢条件を検索します。
 - 最大3件を表示します。条件を確認できる候補が少ない場合はその件数だけ表示します。
 - 車の時間はOSRM / OpenStreetMapで計算し、渋滞なしの片道120分以下だけを残します。実際の出発日時の交通量・事故・休憩・駐車待ちの予測ではありません。
@@ -57,3 +57,12 @@ Supabaseの関数 `ai-outing` と、日本時間で1日10回の利用制限は�
 
 - [権限に関するアドバイザーの説明](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable)
 - [既存の漏洩パスワード保護設定について](https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection)（今回のAI機能とは別で、変更していません）
+
+## 天気サービスの一時障害対策
+
+Open-Meteoが8秒以内に応答しない、HTTPエラー、予報項目の不足の場合はMET Norwayへ切り替えます。MET Norwayは予報期間が約9日間のため、それより先の日付では代替できない場合があります。両方のサービスで予報を確認できない場合は推測で補わず、エラーにします。
+
+MET Norwayの時刻別予報は日本時間で日別集計します。降水確率がない場合は画面にも「提供なし」と表示し、天気の雨・雪などの記号、降水量、風速を使って屋内外を判定します。降水確率を0%と捏造しません。経緯度は小数4桁以内に切り詰め、取得した予報はサーバー専用のキャッシュ表で最低3時間、またはExpiresヘッダーで指定された時刻まで保持します。予報の出典とCC BY 4.0のリンクは画面に表示します。
+
+- [MET Norwayの利用条件](https://api.met.no/doc/TermsOfService)
+- [MET Norwayの予報仕様](https://api.met.no/weatherapi/locationforecast/2.0/documentation)

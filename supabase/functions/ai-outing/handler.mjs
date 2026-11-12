@@ -1,8 +1,9 @@
+import {createWeatherClient} from "./weather.mjs";
 import {ORIGIN,tokyoDate,validateRequest,readForecast,parseCandidates,selectRecommendations,SEARCH_FORMAT,searchPrompt} from './recommend.mjs';
 class ServiceError extends Error{constructor(message,status=503,code='service_error'){super(message);this.status=status;this.code=code;}}
 export function createHandler({env,fetch:fetcher=fetch,now=()=>new Date()}){
   const cache=new Map();
-  async function json(url,options={},timeout=15000){
+  async function json(url,options={},timeout=10000){
     let response;
     try{response=await fetcher(url,{...options,signal:AbortSignal.timeout(timeout)});}catch{throw new ServiceError('外部サービスに接続できませんでした。時間を置いて再実行してください。');}
     let data;try{data=await response.json();}catch{throw new ServiceError('外部サービスの応答を読み取れませんでした。');}
@@ -16,10 +17,20 @@ export function createHandler({env,fetch:fetcher=fetch,now=()=>new Date()}){
     }
     return data;
   }
+  const getWeather=createWeatherClient({fetch:fetcher,now,persistentCache:{
+    get:async key=>{
+      const service=env('SUPABASE_SERVICE_ROLE_KEY');if(!service)return null;
+      const url=`${env('SUPABASE_URL')}/rest/v1/outing_weather_cache?cache_key=eq.${encodeURIComponent(key)}&select=data,expires_at&limit=1`;
+      const rows=await json(url,{headers:{apikey:service,Authorization:`Bearer ${service}`}},3000);
+      return rows?.[0]?{data:rows[0].data,expires:Date.parse(rows[0].expires_at)}:null;
+    },
+    set:async(key,record)=>{
+      const service=env('SUPABASE_SERVICE_ROLE_KEY');if(!service)return;
+      await json(`${env('SUPABASE_URL')}/rest/v1/outing_weather_cache?on_conflict=cache_key`,{method:'POST',headers:{apikey:service,Authorization:`Bearer ${service}`,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=representation'},body:JSON.stringify({cache_key:key,data:record.data,expires_at:new Date(record.expires).toISOString()})},3000);
+    },
+  }});
   async function forecast(latitude,longitude,date){
-    const url=new URL('https://api.open-meteo.com/v1/forecast');
-    url.search=new URLSearchParams({latitude:String(latitude),longitude:String(longitude),daily:'weather_code,precipitation_probability_max,temperature_2m_max,temperature_2m_min,wind_speed_10m_max',start_date:date,end_date:date,timezone:'Asia/Tokyo'});
-    try{return readForecast(await json(url.toString()),date);}catch{throw new ServiceError('天気予報を取得できないため、天候を考慮した提案を作成できません。時間を置いて再実行してください。',503,'weather_unavailable');}
+    try{return await getWeather(latitude,longitude,date);}catch(error){throw new ServiceError(error.message,503,'weather_unavailable');}
   }
   return async request=>{
     const origin=request.headers.get('Origin');
@@ -34,7 +45,7 @@ export function createHandler({env,fetch:fetcher=fetch,now=()=>new Date()}){
     try{
       const base=env('SUPABASE_URL'),anon=env('SUPABASE_ANON_KEY');
       const authHeaders={apikey:anon,Authorization:authorization,'Content-Type':'application/json'};
-      const authResponse=await fetcher(`${base}/auth/v1/user`,{headers:authHeaders,signal:AbortSignal.timeout(10000)});
+      const authResponse=await fetcher(`${base}/auth/v1/user`,{headers:authHeaders,signal:AbortSignal.timeout(8000)});
       if(!authResponse.ok)return reply(401,{error:'ログインし直してください。'});
       const user=await authResponse.json();if(!user?.id)return reply(401,{error:'ログインし直してください。'});
       let body;
@@ -46,10 +57,10 @@ export function createHandler({env,fetch:fetcher=fetch,now=()=>new Date()}){
       const cacheKey=JSON.stringify([user.id,params]);
       const saved=cache.get(cacheKey);if(saved&&saved.expires>now().getTime())return reply(200,{...saved.value,cached:true});
       const originWeather=await forecast(ORIGIN.latitude,ORIGIN.longitude,params.date);
-      const quota=await json(`${base}/rest/v1/rpc/consume_ai_request`,{method:'POST',headers:authHeaders,body:'{}'});
+      const quota=await json(`${base}/rest/v1/rpc/consume_ai_request`,{method:'POST',headers:authHeaders,body:'{}'},8000);
       if(quota!==true)return reply(429,{error:'本日のAI検索は10回までです。明日またお試しください。'});
       let registered=[];
-      try{registered=await json(`${base}/rest/v1/outings?select=name,area&limit=40`,{headers:authHeaders});if(!Array.isArray(registered))registered=[];}catch{/* Web search works independently of saved candidates. */}
+      try{registered=await json(`${base}/rest/v1/outings?select=name,area&limit=40`,{headers:authHeaders},5000);if(!Array.isArray(registered))registered=[];}catch{/* Web search works independently of saved candidates. */}
       const response=await json('https://api.openai.com/v1/responses',{
         method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},
         body:JSON.stringify({model:env('OPENAI_OUTING_MODEL')||'gpt-5.4-mini-2026-03-17',store:false,reasoning:{effort:'low'},tools:[{type:'web_search',search_context_size:'medium',user_location:{type:'approximate',country:'JP',region:'Kanagawa',city:'Yokohama',timezone:'Asia/Tokyo'}}],tool_choice:'required',include:['web_search_call.action.sources'],max_output_tokens:8000,text:{format:SEARCH_FORMAT},input:searchPrompt(params,originWeather,registered)}),
@@ -70,7 +81,7 @@ export function createHandler({env,fetch:fetcher=fetch,now=()=>new Date()}){
       const recommendations=selectRecommendations(candidates,durations,forecasts,originWeather,params);
       const result={date:params.date,origin:ORIGIN.name,ages:[4,6],max_drive_minutes:120,origin_weather:originWeather,checked_at:now().toISOString(),recommendations,
         message:recommendations.length===3?'条件に合う候補を3件見つけました。':`営業・年齢・天気・移動時間の条件を確認できた候補は${recommendations.length}件です。条件を満たさない候補は表示していません。`,
-        travel_note:'車の時間はOSRM / OpenStreetMapによる渋滞を含まない目安です。有料道路・駐車場への移動も含め、出発前にGoogleマップで確認してください。',weather_note:'天気はOpen-Meteoの予報です。降水確率40%以上、雨・雪・霧・雷雨、最大風速36km/h以上の予報では屋内施設に絞っています。',cached:false};
+        travel_note:'車の時間はOSRM / OpenStreetMapによる渋滞を含まない目安です。有料道路・駐車場への移動も含め、出発前にGoogleマップで確認してください。',weather_note:'天気はOpen-MeteoまたはMET Norwayの予報を使用します。雨・雪・霧・雷雨、降水確率40%以上（提供時）、最大風速36km/h以上の予報では屋内施設に絞っています。MET Norwayでは時刻別の予報を日本時間で日別に集計し、降水確率がない場合は天気と降水量で判定します。',cached:false};
       if(cache.size>=100)cache.delete(cache.keys().next().value);
       cache.set(cacheKey,{expires:now().getTime()+15*60000,value:result});
       return reply(200,result);

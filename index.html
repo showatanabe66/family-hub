@@ -7,7 +7,7 @@
   <meta name="description" content="家族の予定、買い物、やること、お出かけをひとつに。Watanabe Family Hub">
   <link rel="manifest" href="./manifest.webmanifest">
   <title>Watanabe Family Hub</title>
-  <link rel="stylesheet" href="./styles.css?v=ai-search-2">
+  <link rel="stylesheet" href="./styles.css?v=ai-weather-3">
 </head>
 <body>
 <header class="site-header">
@@ -32,8 +32,22 @@
     <button type="button" data-view="tasks" aria-pressed="false">タスク</button>
     <button type="button" data-view="add" aria-pressed="false">＋ 追加</button>
   </nav>
-  <section class="welcome"><div><span class="eyebrow">OUR FAMILY, EVERY DAY</span><h1>今日も、家族のいい一日。</h1><p>小さな用事から、楽しみな予定まで。</p></div><span class="welcome-art" aria-hidden="true">⌂</span></section>
+  <section id="familyWelcome" class="welcome" hidden><div><span class="eyebrow">OUR FAMILY, EVERY DAY</span><h1>今日も、家族のいい一日。</h1><p>小さな用事から、楽しみな予定まで。</p></div><span class="welcome-art" aria-hidden="true">⌂</span></section>
 <div id="outingsPanel" class="view-panel">
+  <section id="outingAiPanel" class="card outing-tool">
+    <details open><summary>AIと行き先を考える <span>ネット検索＋天気</span></summary>
+    <p class="ai-family-conditions">東戸塚駅周辺から車で片道約2時間以内 · お子さん4歳・6歳</p>
+    <p class="muted">未登録の施設もネットで探し、現地の天気・年齢条件・営業情報を確認して、最大3件を提案します。</p>
+    <div class="grid ai-input-grid">
+      <div><label for="outingDate">お出かけ日</label><input id="outingDate" type="date" required></div>
+      <div><label for="maxBudget">1人あたり予算上限（任意）</label><input id="maxBudget" type="number" min="0" max="1000000" placeholder="指定なし"></div>
+    </div>
+    <p class="muted">天気は自動で確認します。雨・雪・強風などの予報では屋内施設に絞ります。予報を取得できる今日から15日後までが対象です。</p>
+    <button id="aiBtn" type="button">ネットと天気から3つ提案してもらう</button>
+    <p id="aiStatus" class="muted" role="status">AI検索は1日10回まで。車の時間は渋滞を含まない目安です。</p>
+    <div id="aiResult" aria-busy="false"></div>
+    <details class="ai-setup-help"><summary>AI提案の設定・利用について</summary><p class="muted">OpenAI APIの利用設定が必要です。ChatGPTの契約とは別にAPIの利用料金が発生します。<a href="./docs/ai-outing-setup.md" target="_blank" rel="noopener">初期設定の手順</a></p></details>
+  </details></section>
   <section class="card outing-hero">
     <div class="outing-hero-heading"><div><span class="eyebrow">OUR NEXT ADVENTURE</span><h2>次のお休み、どこへ行こう。</h2><p class="muted">家族の「行きたい」を集めて、次のお出かけに。</p></div><button id="outingAdd" type="button">＋ 候補を追加</button></div>
     <div class="outing-stats"><div><strong id="outingTotal">0</strong><span>登録した候補</span></div><div><strong id="outingFavorites">0</strong><span>お気に入り</span></div><div><strong id="outingUnvisited">0</strong><span>行ってみたい</span></div></div>
@@ -53,20 +67,7 @@
     <p class="muted">予報：Open-Meteo</p>
   </details></section>
 
-  <section id="outingAiPanel" class="card outing-tool">
-    <details><summary>AIと行き先を考える <span>ネット検索＋天気</span></summary>
-    <p class="ai-family-conditions">東戸塚駅周辺から車で片道約2時間以内 · お子さん4歳・6歳</p>
-    <p class="muted">未登録の施設もネットで探し、現地の天気・年齢条件・営業情報を確認して、最大3件を提案します。</p>
-    <div class="grid">
-      <div><label for="outingDate">お出かけ日</label><input id="outingDate" type="date" required></div>
-      <div><label for="maxBudget">1人あたり予算上限（任意）</label><input id="maxBudget" type="number" min="0" max="1000000" placeholder="指定なし"></div>
-    </div>
-    <p class="muted">天気は自動で確認します。雨・雪・強風などの予報では屋内施設に絞ります。予報を取得できる今日から15日後までが対象です。</p>
-    <button id="aiBtn" type="button">ネットと天気から3つ提案してもらう</button>
-    <p id="aiStatus" class="muted" role="status">AI検索は1日10回まで。車の時間は渋滞を含まない目安です。</p>
-    <div id="aiResult" aria-busy="false"></div>
-    <details class="ai-setup-help"><summary>AI提案の設定・利用について</summary><p class="muted">OpenAI APIの利用設定が必要です。ChatGPTの契約とは別にAPIの利用料金が発生します。<a href="./docs/ai-outing-setup.md" target="_blank" rel="noopener">初期設定の手順</a></p></details>
-  </details></section>
+
 
 </div>
   <section id="addPanel" class="view-panel" data-panel="add" hidden>
@@ -143,8 +144,8 @@
   </section>
   </section>
 </main>
-<script type="module" src="./app.js?v=ai-search-2"></script>
-<script type="module" src="./ui.js?v=ai-search-2"></script>
+<script type="module" src="./app.js?v=ai-weather-3"></script>
+<script type="module" src="./ui.js?v=ai-weather-3"></script>
 
 </body>
 </html>

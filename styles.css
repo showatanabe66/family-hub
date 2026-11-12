@@ -39,3 +39,14 @@
 
 /* Search-backed family outing suggestions */
 .ai-family-conditions{padding:12px 14px;background:#eef4e7;border-radius:10px;font-size:13px;color:#426b49;font-weight:600}.ai-outing-summary{margin-top:20px;padding:17px;background:#f1f6e9;border:1px solid #d7e4cc;border-radius:12px}.ai-outing-summary strong{font-size:14px}.ai-outing-summary p{font-size:12px;line-height:1.8;margin:8px 0}.ai-weather-policy{display:inline-block;font-size:11px;color:#567242;border:1px solid #c4d7b5;border-radius:5px;padding:3px 7px}.ai-outing-card{padding:20px;border:1px solid #dce6d3;border-radius:15px;margin:16px 0}.ai-outing-heading{display:flex;align-items:flex-start;gap:10px}.ai-outing-heading h3{font-size:19px;margin:0;line-height:1.6;overflow-wrap:anywhere}.ai-outing-rank{background:#2d6552;color:white;width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;font-size:13px}.ai-child-reason{font-size:14px;line-height:1.9;white-space:pre-wrap}.ai-place-weather{padding:10px 12px;background:#f5f8f0;border-radius:8px;font-size:12px;color:#59724a}.ai-outing-card p{overflow-wrap:anywhere}.ai-sources{margin-top:16px}.ai-sources>summary,.ai-setup-help>summary{font-size:11px!important;padding:5px 0!important;font-weight:500!important;color:#7c8e70}.ai-sources a{display:block;font-size:11px;color:#517452;text-underline-offset:3px;overflow-wrap:anywhere;margin:8px 0}.ai-evidence-note,.ai-checked-time{font-size:11px!important}.ai-setup-help{margin-top:18px!important}#aiBtn:disabled{cursor:wait}#aiResult[aria-busy=true]{min-height:24px}@media(max-width:600px){.ai-outing-card{padding:16px}.ai-outing-heading h3{font-size:17px}.ai-family-conditions{font-size:12px}.ai-child-reason{font-size:13px}}
+
+/* Keep AI search first and align Safari date and budget fields. */
+#outingAiPanel{margin-top:0;border-color:#cbdcc0}
+#outingAiPanel .ai-input-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}
+.ai-input-grid>div{min-width:0}
+.ai-input-grid label{min-height:3.2em}
+.ai-input-grid input{display:block;min-width:0;max-width:100%}
+.ai-input-grid input[type=date]{-webkit-appearance:none;appearance:none}
+.ai-weather-credits{display:flex;gap:7px;flex-wrap:wrap;font-size:11px!important}
+.ai-weather-credits a{color:#56774e;text-underline-offset:3px}
+@media(max-width:420px){#outingAiPanel .ai-input-grid{grid-template-columns:1fr;gap:0}.ai-input-grid label{min-height:0}}

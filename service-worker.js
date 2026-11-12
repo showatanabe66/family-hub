@@ -1,5 +1,5 @@
-const CACHE = "family-hub-shell-v11";
-const SHELL = ["./", "./index.html", "./app.js?v=ai-search-2", "./ai-outing-ui.js", "./outing-browser.js", "./styles.css?v=ai-search-2", "./ui.js?v=ai-search-2", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
+const CACHE = "family-hub-shell-v12";
+const SHELL = ["./", "./index.html", "./app.js?v=ai-weather-3", "./ai-outing-ui.js?v=ai-weather-3", "./outing-browser.js", "./styles.css?v=ai-weather-3", "./ui.js?v=ai-weather-3", "./family-extra.js", "./schedule-calendar.js", "./apple-sync.js", "./manifest.webmanifest"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(path => new Request(new URL(path, self.location.href), {cache: "reload"})))));

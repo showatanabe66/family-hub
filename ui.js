@@ -3,6 +3,8 @@ document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('ja-
 let currentView = 'outings';
 function showView(view) {
   currentView = view;
+  const welcome = document.getElementById("familyWelcome");
+  if (welcome) welcome.hidden = view === "outings";
   document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
   document.getElementById('outingsPanel').classList.toggle('hidden', view !== 'outings');
   document.querySelectorAll('[data-panel]').forEach(panel => panel.hidden = panel.dataset.panel !== view);

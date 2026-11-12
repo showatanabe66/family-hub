@@ -33,13 +33,14 @@ test('checks actual route seconds, candidate weather, budget and returns up to t
  assert.equal(selectRecommendations([places[0]],[600],[good],bad,params).length,0);
  assert.equal(selectRecommendations([{...places[1],budget_per_person:null}],[600],[good],good,{...params,budget:0}).length,0);
 });
-function fixture({key='test-key',rain=false,quota=true,weatherFailure=false}={}){
+function fixture({key='test-key',rain=false,quota=true,weatherFailure=false,fallbackWeather=false}={}){
  const calls=[],places=[candidate('A'),candidate('B','屋外'),candidate('C')];
  const env=name=>({SUPABASE_URL:'https://project.example',SUPABASE_ANON_KEY:'public-key',OPENAI_API_KEY:key})[name];
  const fetcher=async(url,options={})=>{
   calls.push({url,options});
   if(url.endsWith('/auth/v1/user'))return Response.json({id:'user-1'});
   if(url.includes('api.open-meteo.com')){if(weatherFailure)throw new Error('network');return Response.json(daily(rain?61:0));}
+  if(url.includes('api.met.no')&&fallbackWeather)return Response.json({properties:{timeseries:[0,6,12].map(hour=>({time:`${date}T${String(hour).padStart(2,'0')}:00:00Z`,data:{instant:{details:{air_temperature:18,wind_speed:2}},next_6_hours:{summary:{symbol_code:'clearsky_day'},details:{precipitation_amount:0}}}}))}});
   if(url.endsWith('consume_ai_request'))return Response.json(quota);
   if(url.includes('/rest/v1/outings?'))return Response.json([{name:'登録済み候補',area:'横浜'}]);
   if(url==='https://api.openai.com/v1/responses')return Response.json(response(places));
@@ -88,4 +89,12 @@ test('result cards keep searched text safe, show sources, and save only on click
  assert.equal(saves,0);assert.ok(flatten(root).some(node=>node.tag==='h3'&&node.textContent==='<img onerror=alert(1)>'));
  assert.ok(flatten(root).filter(node=>node.tag==='a').every(node=>node.href.startsWith('https:')));
  const save=flatten(root).find(node=>node.tag==='button');await save.onclick();assert.equal(saves,1);assert.equal(save.disabled,true);
+});
+
+test('a primary weather outage no longer blocks the complete recommendation pipeline',async()=>{
+ const {handler,calls}=fixture({weatherFailure:true,fallbackWeather:true});
+ const result=await handler(request({date}));assert.equal(result.status,200);
+ const data=await result.json();assert.equal(data.origin_weather.source_name,'MET Norway');
+ assert.deepEqual(data.recommendations.map(place=>place.name),['A','B']);
+ assert.ok(calls.some(call=>call.url==='https://api.openai.com/v1/responses'));
 });
