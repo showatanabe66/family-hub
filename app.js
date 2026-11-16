@@ -1,3 +1,4 @@
+import { initWidgetSettings } from "./widget-settings.js?v=iphone-widget-1";
 import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js?v=ai-weather-3";
 import { createOutingBrowser } from "./outing-browser.js";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -10,6 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://aaozokleopirgsuaubnz.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_5jE4ze4_hRxTIT0ybKEImQ_OvKGt5S5";
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+initWidgetSettings(supabase);
 
 const $ = (id) => document.getElementById(id);
 const loginBox = $("login");

@@ -4,3 +4,7 @@ verify_jwt = false
 
 [functions.ai-outing]
 verify_jwt = true
+
+[functions.widget-summary]
+# Dedicated read-only device key is verified inside the function.
+verify_jwt = false

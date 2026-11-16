@@ -6,8 +6,11 @@
   <meta name="theme-color" content="#f4f7f2">
   <meta name="description" content="家族の予定、買い物、やること、お出かけをひとつに。Watanabe Family Hub">
   <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Watanabe Hub">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <title>Watanabe Family Hub</title>
-  <link rel="stylesheet" href="./styles.css?v=ai-weather-3">
+  <link rel="stylesheet" href="./styles.css?v=iphone-widget-1">
 </head>
 <body>
 <header class="site-header">
@@ -71,6 +74,19 @@
 
 </div>
   <section id="addPanel" class="view-panel" data-panel="add" hidden>
+    <section id="widgetSettings" class="card">
+      <h2>iPhoneウィジェット</h2>
+      <p class="muted">今日の予定・未完了タスク数・買い物件数をホーム画面に。Scriptableアプリで利用できます。</p>
+      <a class="widget-setup-link" href="./widget-setup.html">ホーム画面アプリとウィジェットの設定手順 →</a>
+      <details><summary>ウィジェット用キーを設定する</summary>
+        <p class="muted">このHubアカウントの予定と件数を読む専用キーです。Apple同期キーやOpenAI APIキーとは別です。Hubからログアウトした後も有効なので、不要になったらここで無効にしてください。</p>
+        <button id="widgetCreate" type="button">ウィジェット用キーを発行・再発行</button>
+        <pre id="widgetKey" aria-live="polite"></pre>
+        <button id="widgetCopy" class="secondary" type="button" hidden>キーをコピー</button>
+        <p id="widgetStatus" class="muted" role="status"></p>
+        <button id="widgetRevoke" class="secondary" type="button">ウィジェット用キーを無効にする</button>
+      </details>
+    </section>
     <section class="card">
       <h2>Appleの予定・リマインダー連携</h2>
       <p class="muted">カレンダーの選択した3件 → 予定 ／「買い物リスト」→ 買い物 ／「渡邊家」→ タスク</p>
@@ -144,8 +160,8 @@
   </section>
   </section>
 </main>
-<script type="module" src="./app.js?v=ai-weather-3"></script>
-<script type="module" src="./ui.js?v=ai-weather-3"></script>
+<script type="module" src="./app.js?v=iphone-widget-1"></script>
+<script type="module" src="./ui.js?v=iphone-widget-1"></script>
 
 </body>
 </html>

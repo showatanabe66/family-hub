@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f7f2">
+  <title>iPhoneの設定 | Watanabe Family Hub</title>
+  <link rel="stylesheet" href="./styles.css?v=iphone-widget-1">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+</head>
+<body class="widget-setup-page">
+  <header class="site-header"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">⌂</span><span>Watanabe Family Hub<small>iPhoneで使う</small></span></a></header>
+  <section class="setup-intro"><span class="eyebrow">ALWAYS CLOSE TO HOME</span><h1>家族の今日を、ホーム画面に。</h1><p class="muted">今日の予定・未完了タスク数・買い物件数を表示します。ウィジェットをタップするとFamily Hubの予定タブを開きます。</p></section>
+  <section class="card">
+    <div class="setup-step"><span class="setup-number">A</span><h2>Hubをホーム画面に追加</h2></div>
+    <ol><li>Safariで<a href="./">Family Hub</a>を開きます。</li><li>共有メニューから「ホーム画面に追加」を選びます。「Webアプリとして開く」がある場合はオンにします。</li><li>名前を確認して追加。ホーム画面のアイコンから開き、必要ならログインしてください。</li></ol>
+    <p class="muted">App Storeへの登録は不要です。ウィジェットとは別の、Hubを開くためのアイコンです。</p>
+  </section>
+  <section class="card">
+    <div class="setup-step"><span class="setup-number">1</span><h2>Scriptableにスクリプトを追加</h2></div>
+    <p class="muted">ScriptableはiPhoneのホーム画面にJavaScript製ウィジェットを置けるアプリです。</p>
+    <a class="setup-action secondary" href="https://apps.apple.com/jp/app/scriptable/id1405459188" target="_blank" rel="noopener">App StoreでScriptableを開く</a>
+    <button id="copyWidgetScript" type="button" disabled>スクリプトを読み込み中…</button>
+    <p id="scriptCopyStatus" class="muted" role="status"></p>
+    <a class="setup-action secondary" href="scriptable:///add">Scriptableで新規作成</a>
+    <ol><li>Scriptableをインストールしたら、上の「スクリプトをコピー」を押します。</li><li>「Scriptableで新規作成」を押すか、Scriptableの「＋」から空のスクリプトを作ります。</li><li>編集欄に貼り付け、名前を <strong>Family Hub</strong> にして保存します。</li></ol>
+    <details id="scriptCodeDetails"><summary>コードを表示・手動コピー</summary><textarea id="widgetScriptSource" class="setup-code" readonly aria-label="Scriptable用スクリプト"></textarea><a href="./widgets/Family-Hub.js" download="Family Hub.js">JavaScriptファイルをダウンロード</a></details>
+  </section>
+  <section class="card">
+    <div class="setup-step"><span class="setup-number">2</span><h2>読み取り専用キーで連携</h2></div>
+    <ol><li>下のボタンでHubを開き、ログインします。</li><li>「iPhoneウィジェット」→「ウィジェット用キーを設定する」→「発行・再発行」→「キーをコピー」。</li><li>Scriptableへ戻り、作成した「Family Hub」を実行します。</li><li>初回の入力欄にウィジェット用キーを貼り付け、「接続する」を押します。</li></ol>
+    <a class="setup-action" href="./?view=add#widgetSettings">Hubでウィジェット用キーを発行する</a>
+    <p class="setup-note">Apple同期キーやOpenAI APIキーとは別です。キーはScriptableのKeychainに保存します。パスワードをスクリプトに書く必要はありません。キーの有効期間は90日です。</p>
+  </section>
+  <section class="card">
+    <div class="setup-step"><span class="setup-number">3</span><h2>ウィジェットを置く</h2></div>
+    <ol><li>iPhoneのホーム画面の空いている場所を長押しします。</li><li>「編集」→「ウィジェットを追加」（または「＋」）からScriptableを探します。</li><li>まず<strong>中サイズ</strong>を追加します。小・大サイズにも対応しています。</li><li>追加したウィジェットを長押し→「ウィジェットを編集」。Scriptに <strong>Family Hub</strong> を選びます。</li></ol>
+    <p class="muted">表示は今日の予定と件数のみで、完了操作はHubやAppleのアプリで行います。タップしたときはSafariなどでHubを開きます。</p>
+  </section>
+  <section class="card">
+    <h2>更新と表示について</h2>
+    <p class="muted">自動更新のタイミングはiOSが決めます。15分後からの更新を依頼しますが、定刻・即時の更新は保証されません。すぐ確認したいときはScriptableで「Family Hub」を実行してください。</p>
+    <p class="muted">Apple側の変更は、既に設定した同期ショートカットがHubへ送信した後に反映されます。「Hub取得」はウィジェットがHubを読んだ時刻です。</p>
+    <p class="muted">通信できない場合は、同じ日の6時間以内の保存分を「保存分」と明記して表示します。前日の予定を今日の予定としては表示しません。キーが期限切れ・無効の場合は保存分も消して再設定を案内します。</p>
+    <p class="muted">共有画面に予定を出したくない場合はウィジェットを外すか、Hubの「＋ 追加」から専用キーを無効にしてください。Hubのログアウトだけではウィジェットは解除されません。</p>
+    <div class="setup-links"><a href="https://docs.scriptable.app/listwidget/" target="_blank" rel="noopener">Scriptableの更新仕様</a><a href="./?view=add#widgetSettings">キーの無効化・再発行</a><a href="./?view=schedules">予定を開く</a></div>
+  </section>
+  <script type="module" src="./widget-setup.js"></script>
+</body>
+</html>

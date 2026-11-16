@@ -1,6 +1,7 @@
 const date = new Date();
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('ja-JP', {timeZone:'Asia/Tokyo',month:'long',day:'numeric',weekday:'short'}).format(date);
-let currentView = 'outings';
+const requestedView = new URLSearchParams(globalThis.location?.search || '').get('view');
+let currentView = ['outings','schedules','shopping','tasks','add'].includes(requestedView) ? requestedView : 'outings';
 function showView(view) {
   currentView = view;
   const welcome = document.getElementById("familyWelcome");
@@ -10,7 +11,14 @@ function showView(view) {
   document.querySelectorAll('[data-panel]').forEach(panel => panel.hidden = panel.dataset.panel !== view);
 }
 document.querySelectorAll('[data-view]').forEach(button => button.addEventListener('click', () => showView(button.dataset.view)));
-document.addEventListener('family-panels-ready', () => showView(currentView));
+document.addEventListener('family-panels-ready', () => {
+  showView(currentView);
+  if (currentView === 'add' && globalThis.location?.hash === '#widgetSettings') {
+    const section = document.getElementById('widgetSettings');
+    section?.querySelector('details')?.setAttribute('open','');
+    section?.scrollIntoView({block:'start'});
+  }
+});
 showView(currentView);
 // Associate existing labels with their controls, including dynamically created forms.
 function labelControls() {
