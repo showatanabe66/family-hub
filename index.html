@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Watanabe Hub">
   <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <title>Watanabe Family Hub</title>
-  <link rel="stylesheet" href="./styles.css?v=iphone-widget-1">
+  <link rel="stylesheet" href="./styles.css?v=weekend-album-1">
 </head>
 <body>
 <header class="site-header">
@@ -30,6 +30,7 @@
 <main id="app" class="hidden">
   <nav class="hub-nav" aria-label="機能を選ぶ">
     <button type="button" data-view="outings" aria-pressed="true">お出かけ</button>
+    <button type="button" data-view="album" aria-pressed="false">アルバム</button>
     <button type="button" data-view="schedules" aria-pressed="false">予定</button>
     <button type="button" data-view="shopping" aria-pressed="false">買い物</button>
     <button type="button" data-view="tasks" aria-pressed="false">タスク</button>
@@ -73,6 +74,7 @@
 
 
 </div>
+  <section id="albumPanel" class="view-panel" data-panel="album" hidden><p class="muted">写真と記録は、この端末・このブラウザ内に保存されます。家族の別端末には同期されません。</p><iframe id="albumFrame" title="週末お出かけアルバム"></iframe></section>
   <section id="addPanel" class="view-panel" data-panel="add" hidden>
     <section id="widgetSettings" class="card">
       <h2>iPhoneウィジェット</h2>
@@ -160,8 +162,9 @@
   </section>
   </section>
 </main>
-<script type="module" src="./app.js?v=iphone-widget-1"></script>
-<script type="module" src="./ui.js?v=iphone-widget-1"></script>
+<script type="module" src="./app.js?v=weekend-album-1"></script>
+<script type="module" src="./ui.js?v=weekend-album-1"></script>
 
 </body>
 </html>
+
