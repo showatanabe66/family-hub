@@ -1,3 +1,4 @@
+import { createAlbumBridge, withAlbumVisits } from "./album-bridge.js";
 import { initWidgetSettings } from "./widget-settings.js?v=iphone-widget-1";
 import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js?v=ai-weather-3";
 import { createOutingBrowser } from "./outing-browser.js";
@@ -28,6 +29,9 @@ function mapDirectionsUrl(place) {
   return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}&travelmode=driving`;
 }
 
+let albumCounts={}, currentOutings=[];
+const albumBridge=createAlbumBridge($("albumFrame"), counts=>{albumCounts=counts; if(typeof outingBrowser!=="undefined")outingBrowser.update(withAlbumVisits(currentOutings,counts));});
+
 async function refreshOutings() {
   const { data, error } = await supabase.from("outings")
     .select("*").order("favorite", { ascending: false }).order("name");
@@ -48,6 +52,7 @@ function openOutingSection(id) {
 }
 const outingBrowser = createOutingBrowser($("outingList"), {
   map:mapSearchUrl, route:mapDirectionsUrl, add:addOuting,
+  album:place=>albumBridge.open(place,"spot"), record:place=>albumBridge.open(place,"new"),
   error:text=>message("outingMessage",text),
   update:async (place,field,value)=>{
     message("outingMessage", "");
@@ -77,7 +82,9 @@ function renderOutings(items) {
     const option=document.createElement("option");option.value=String(place.id);option.textContent=place.name;$("weatherPlace").append(option);
   }
   if(items.some(place=>String(place.id)===selected))$("weatherPlace").value=selected;
-  outingBrowser.update(items);
+  currentOutings=items;
+  albumBridge.setPlaces(items);
+  outingBrowser.update(withAlbumVisits(items,albumCounts));
 }
 
 async function savePlace() {
@@ -171,6 +178,7 @@ async function start() {
   loginBox.classList.toggle("hidden", !!session);
   appBox.classList.toggle("hidden", !session);
   $("logoutBtn").hidden = !session;
+  albumBridge.setOwner(session?.user?.id || null);
   if (session) {
     try { await refreshOutings(); } catch (e) { alert(`データ読込エラー：${e.message}`); }
   }
@@ -191,6 +199,7 @@ $("weatherBtn").onclick = getWeather;
 $("aiBtn").onclick = askAI;
 
 supabase.auth.onAuthStateChange((_event, session) => {
+  albumBridge.setOwner(session?.user?.id || null);
   loginBox.classList.toggle("hidden", !!session);
   appBox.classList.toggle("hidden", !session);
   $("logoutBtn").hidden = !session;
@@ -219,3 +228,4 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js", {updateViaCache: "none"}).catch(console.warn));
 }
 import("./family-extra.js").then(m => m.initExtra(supabase)).catch(console.error);
+

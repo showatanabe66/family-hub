@@ -57,6 +57,7 @@ export function createOutingBrowser(root, actions) {
     const badges=el('div','outing-badges');
     if(place.type)badges.append(el('span','outing-badge',place.type));
     if(place.category)badges.append(el('span','outing-badge',place.category));
+    if(place.albumCount)badges.append(el('span','outing-badge',`写真の記録 ${place.albumCount}件（この端末）`));
     if(place.visited)badges.append(el('span','outing-badge outing-visited-badge','訪問済み'));
     const metrics=el('div','outing-metrics');
     metrics.append(el('span','',place.drive_minutes==null?'移動時間未登録':`車で${place.drive_minutes}分`),el('span','',place.budget_per_person==null?'予算未登録':Number(place.budget_per_person)===0?'無料':`¥${Number(place.budget_per_person).toLocaleString('ja-JP')} / 人`));
@@ -67,11 +68,13 @@ export function createOutingBrowser(root, actions) {
       const link=el('a','',label);link.href=url;link.target='_blank';link.rel='noopener';links.append(link);
     }
     links.append(button('天気を見る','outing-weather-link',()=>actions.weather(place)));
+    if(actions.record)links.append(button("写真で記録","outing-weather-link",()=>actions.record(place)));
+    if(actions.album)links.append(button("アルバムを見る","outing-weather-link",()=>actions.album(place)));
     card.append(links);
     const more=el('details','outing-place-more');more.append(el('summary','','訪問の記録・詳細'));
     if(place.address)more.append(el('p','muted',place.address));
     const controls=el('div','outing-place-controls');
-    controls.append(button(place.visited?'未訪問に戻す':'訪問済みにする','secondary',()=>actions.update(place,'visited',!place.visited)),button('候補を削除','outing-delete',()=>actions.remove(place)));
+    controls.append(button(place.albumCount?'訪問の手動設定を切り替える':place.visited?'未訪問に戻す':'訪問済みにする','secondary',()=>actions.update(place,'visited',!(place.manualVisited??place.visited))),button('候補を削除','outing-delete',()=>actions.remove(place)));
     more.append(controls);card.append(more);return card;
   }
   function draw(){
@@ -99,3 +102,4 @@ export function createOutingBrowser(root, actions) {
     draw();
   }};
 }
+

@@ -1,11 +1,11 @@
 const date = new Date();
 document.getElementById('todayLabel').textContent = new Intl.DateTimeFormat('ja-JP', {timeZone:'Asia/Tokyo',month:'long',day:'numeric',weekday:'short'}).format(date);
 const requestedView = new URLSearchParams(globalThis.location?.search || '').get('view');
-let currentView = ['outings','schedules','shopping','tasks','add'].includes(requestedView) ? requestedView : 'outings';
+let currentView = ['outings','album','schedules','shopping','tasks','add'].includes(requestedView) ? requestedView : 'outings';
 function showView(view) {
   currentView = view;
   const welcome = document.getElementById("familyWelcome");
-  if (welcome) welcome.hidden = view === "outings";
+  if (welcome) welcome.hidden = ["outings","album"].includes(view);
   document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
   document.getElementById('outingsPanel').classList.toggle('hidden', view !== 'outings');
   document.querySelectorAll('[data-panel]').forEach(panel => panel.hidden = panel.dataset.panel !== view);
@@ -30,3 +30,4 @@ function labelControls() {
 }
 labelControls();
 document.addEventListener('family-panels-ready', labelControls);
+
