@@ -10,7 +10,9 @@
   <meta name="apple-mobile-web-app-title" content="Watanabe Hub">
   <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <title>Watanabe Family Hub</title>
-  <link rel="stylesheet" href="./styles.css?v=weekend-album-1">
+  <link rel="stylesheet" href="./styles.css?v=muse-outings-1">
+  <link rel="stylesheet" href="./vendor/leaflet.css">
+  <script defer src="./vendor/leaflet.js"></script>
 </head>
 <body>
 <header class="site-header">
@@ -38,8 +40,12 @@
   </nav>
   <section id="familyWelcome" class="welcome" hidden><div><span class="eyebrow">OUR FAMILY, EVERY DAY</span><h1>今日も、家族のいい一日。</h1><p>小さな用事から、楽しみな予定まで。</p></div><span class="welcome-art" aria-hidden="true">⌂</span></section>
 <div id="outingsPanel" class="view-panel">
+  <section class="outing-weekend-head"><p class="eyebrow">WEEKEND WITH THE FAMILY</p><h1>今度のお休み、どこに行く？</h1><p>東戸塚から車で約2時間以内 · 4歳・6歳と楽しむ</p></section>
+  <nav id="outingDates" class="outing-dates" aria-label="お出かけ日を選択"></nav>
+  <section id="outingForecast" class="outing-forecast" aria-live="polite"></section>
+  <section class="outing-recommended-section"><h2 id="outingRecommendedTitle">今日のおすすめ</h2><p class="muted">天気と近さを参考に選んだ3件。営業日・対象年齢・ふれあいの実施状況は公式情報をご確認ください。</p><div id="outingRecommended" class="outing-recommended"></div></section>
   <section id="outingAiPanel" class="card outing-tool">
-    <details open><summary>AIと行き先を考える <span>ネット検索＋天気</span></summary>
+    <details><summary>AIで新しい行き先を探す <span>ネット検索＋天気</span></summary>
     <p class="ai-family-conditions">東戸塚駅周辺から車で片道約2時間以内 · お子さん4歳・6歳</p>
     <p class="muted">未登録の施設もネットで探し、現地の天気・年齢条件・営業情報を確認して、最大3件を提案します。</p>
     <div class="grid ai-input-grid">
@@ -54,11 +60,11 @@
   </details></section>
   <section class="card outing-hero">
     <div class="outing-hero-heading"><div><span class="eyebrow">OUR NEXT ADVENTURE</span><h2>次のお休み、どこへ行こう。</h2><p class="muted">家族の「行きたい」を集めて、次のお出かけに。</p></div><button id="outingAdd" type="button">＋ 候補を追加</button></div>
-    <div class="outing-stats"><div><strong id="outingTotal">0</strong><span>登録した候補</span></div><div><strong id="outingFavorites">0</strong><span>お気に入り</span></div><div><strong id="outingUnvisited">0</strong><span>行ってみたい</span></div></div>
+    <div class="outing-stats"><div><strong id="outingTotal">0</strong><span>スポット</span></div><div><strong id="outingFavorites">0</strong><span>お気に入り</span></div><div><strong id="outingUnvisited">0</strong><span>行ってみたい</span></div></div>
     <div class="outing-quick-actions"><button id="outingWeatherShortcut" class="secondary" type="button">天気を確認する</button><button id="outingAiShortcut" class="secondary" type="button">AIと行き先を考える</button></div>
   </section>
   <section class="card outing-library">
-    <h2>家族のお出かけ候補</h2>
+    <div class="outing-map-section"><h2>地図で見る</h2><p id="outingMapNote" class="muted">番号は下の一覧と対応します。地図はボタンを押すと読み込みます。</p><button type="button" id="outingMapOpen" class="secondary">番号付き地図を表示</button><div id="outingMap" class="outing-map" hidden></div></div><h2>すべてのスポット</h2><p class="muted">初期31件に登録済みの候補を追加して表示します。車の時間は提供された目安です。渋滞・高速道路・駐車場の条件はルートで確認してください。初期スポットのお気に入りと訪問マークは、この端末内に保存されます。</p>
     <p id="outingMessage" class="muted" role="status"></p>
     <div id="outingList"></div>
   </section>
@@ -162,8 +168,8 @@
   </section>
   </section>
 </main>
-<script type="module" src="./app.js?v=weekend-album-1"></script>
-<script type="module" src="./ui.js?v=weekend-album-1"></script>
+<script type="module" src="./app.js?v=muse-outings-1"></script>
+<script type="module" src="./ui.js?v=muse-outings-1"></script>
 
 </body>
 </html>

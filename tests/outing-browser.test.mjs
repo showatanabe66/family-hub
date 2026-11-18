@@ -22,6 +22,7 @@ test('combines status, category, type and numeric limits including zero',()=>{
 });
 class Element{
  constructor(tag){this.tag=tag;this.children=[];this.dataset={};this.attributes={};this.className='';this.textContent='';this.value='';}
+ querySelectorAll(selector){return flatten(this).filter(el=>selector==='[data-filter]'?el.dataset.filter!==undefined:selector==='[data-toggle]'?el.dataset.toggle!==undefined:false);}
  append(...children){this.children.push(...children);}
  replaceChildren(...children){this.children=[...children];}
  setAttribute(key,value){this.attributes[key]=value;}

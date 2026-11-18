@@ -4,6 +4,7 @@ const requestedView = new URLSearchParams(globalThis.location?.search || '').get
 let currentView = ['outings','album','schedules','shopping','tasks','add'].includes(requestedView) ? requestedView : 'outings';
 function showView(view) {
   currentView = view;
+  document.body.classList.toggle("outings-theme", view === "outings");
   const welcome = document.getElementById("familyWelcome");
   if (welcome) welcome.hidden = ["outings","album"].includes(view);
   document.querySelectorAll('[data-view]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.view === view)));
