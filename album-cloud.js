@@ -18,7 +18,7 @@ export function createAlbumCloudStore(client){
   // An import never overwrites a record already edited or deleted on another device.
   if(migration&&existing)return {record:toAlbumRecord(existing),skipped:true};
   if(existing?.deleted_at)fail('別の端末で削除された記録です。同期を更新してください。');
-  if(existing&&record.version==null)return {record:toAlbumRecord(existing),skipped:true};
+  if(existing&&record.version==null)fail('この記録はすでに保存されています。キャンセルして年表から確認し、必要なら編集してください。');
   if(existing&&existing.version!==record.version)fail('別の端末で更新されています。画面を開き直してから編集してください。');
   if(record.version!=null&&!existing)fail('この記録を確認できません。同期を更新してください。');
   const name=String(record.placeName||'').trim(),comment=String(record.comment||'').trim();

@@ -24,6 +24,7 @@ const photo=()=>new Blob(['image'],{type:'image/png'});
 test('two devices share create/edit/photo replacement/delete and old backups cannot resurrect deletions',async()=>{
  const b=backend(),a=createAlbumCloudStore(b.client(owner)),second=createAlbumCloudStore(b.client(owner));
  const saved=await a.request(owner,'save',{record,photo:photo()});assert.equal(saved.record.version,1);
+ await assert.rejects(a.request(owner,'save',{record,photo:photo()}),/すでに保存されています/);assert.equal(b.rows.size,1);
  let list=await second.request(owner,'list');assert.equal(list.length,1);assert.equal(await (await second.request(owner,'photo',{path:list[0].photoPath})).text(),'image');
  const changed=await second.request(owner,'save',{record:{...list[0],comment:'別端末から編集'},photo:photo()});assert.equal(changed.record.version,2);assert.equal(b.files.size,1);
  await assert.rejects(a.request(owner,'save',{record:saved.record,photo:photo()}),/別の端末で更新/);
