@@ -1,3 +1,4 @@
+import { createAlbumCloudStore } from "./album-cloud.js";
 import { createAlbumBridge, withAlbumVisits } from "./album-bridge.js";
 import { initWidgetSettings } from "./widget-settings.js?v=iphone-widget-1";
 import { dateLimits, renderAiRecommendations } from "./ai-outing-ui.js?v=ai-weather-3";
@@ -31,7 +32,7 @@ function mapDirectionsUrl(place) {
 }
 
 let albumCounts={}, currentOutings=[],activeOutingOwner=null;
-const albumBridge=createAlbumBridge($("albumFrame"), counts=>{albumCounts=counts; renderOutings(currentOutings);});
+const albumBridge=createAlbumBridge($("albumFrame"), counts=>{albumCounts=counts; renderOutings(currentOutings);},createAlbumCloudStore(supabase));
 
 async function refreshOutings() {
   const { data, error } = await supabase.from("outings")

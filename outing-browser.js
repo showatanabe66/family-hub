@@ -72,7 +72,7 @@ export function createOutingBrowser(root, actions) {
     if(place.petting)badges.append(el('span','outing-badge','小動物ふれあい'));
     if(place.type)badges.append(el('span','outing-badge',place.type));
     if(place.category)badges.append(el('span','outing-badge',place.category));
-    if(place.albumCount)badges.append(el('span','outing-badge',`写真の記録 ${place.albumCount}件（この端末）`));
+    if(place.albumCount)badges.append(el('span','outing-badge',`写真の記録 ${place.albumCount}件`));
     if(place.visited)badges.append(el('span','outing-badge outing-visited-badge','訪問済み'));
     const metrics=el('div','outing-metrics');
     metrics.append(el('span','',place.drive_minutes==null?'移動時間未登録':`東戸塚から車で約${Math.round(place.drive_minutes/5)*5}分`),el('span','',place.budget_per_person==null?'予算未登録':Number(place.budget_per_person)===0?'無料':`¥${Number(place.budget_per_person).toLocaleString('ja-JP')} / 人`));

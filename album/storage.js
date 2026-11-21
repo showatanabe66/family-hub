@@ -1,21 +1,18 @@
-// 保存方式を変更する場合は、このモジュールの公開APIを置き換える。
-let database;
-function requestResult(request) { return new Promise((resolve,reject)=> {request.onsuccess=()=>resolve(request.result); request.onerror=()=>reject(request.error);}); }
-async function db() {
-  if (!database) database = new Promise((resolve,reject)=> {
-    const req=indexedDB.open('family-hub-album:'+new URLSearchParams(location.search).get('owner'),1);
-    req.onupgradeneeded=()=> {req.result.createObjectStore('records',{keyPath:'id'});req.result.createObjectStore('photos');};
-    req.onsuccess=()=>resolve(req.result);req.onerror=()=>{database=null;reject(req.error);};
-    req.onblocked=()=>{database=null;reject(new Error('他のタブを閉じてから再読み込みしてください。'));};
-  });
-  return database;
+import * as local from './local-storage.js';
+const owner=new URLSearchParams(location.search).get('owner');
+const waiting=new Map();
+window.addEventListener('message',event=>{
+ if(event.origin!==location.origin||event.source!==parent||event.data?.type!=='family-album-response'||event.data.owner!==owner)return;
+ const task=waiting.get(event.data.id);if(!task)return;waiting.delete(event.data.id);clearTimeout(task.timeout);event.data.error?task.reject(new Error(event.data.error)):task.resolve(event.data.result);
+});
+function request(method,payload={}){return new Promise((resolve,reject)=>{if(parent===window||!owner){reject(new Error('Family Hubのアルバムタブから開いてください。'));return;}const id=crypto.randomUUID();const timeout=setTimeout(()=>{waiting.delete(id);reject(new Error('同期の応答を確認できません。通信状態を確認し、同期を更新してください。'));},120000);waiting.set(id,{resolve,reject,timeout});parent.postMessage({type:'family-album-request',owner,id,method,payload},location.origin);});}
+export const listRecords=()=>request('list');
+export const getPhoto=path=>request('photo',{path});
+export const saveRecord=(record,photo)=>request('save',{record,photo});
+export const deleteRecord=record=>request('delete',{record});
+export async function localRecordCount(){return (await local.listRecords()).filter(r=>!r.cloudMigrated).length;}
+export async function migrateLocalRecords(onProgress=()=>{}){
+ const records=(await local.listRecords()).filter(r=>!r.cloudMigrated);let done=0;
+ for(const record of records){const photo=await local.getPhoto(record.photoPath);await request('save',{record,photo,migration:true});await local.saveRecord({...record,cloudMigrated:true});onProgress(++done,records.length);}
+ return done;
 }
-export async function listRecords(){return requestResult((await db()).transaction('records').objectStore('records').getAll());}
-export async function getPhoto(path){return requestResult((await db()).transaction('photos').objectStore('photos').get(path));}
-function complete(tx){return new Promise((resolve,reject)=>{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('保存を中断しました'));});}
-export async function saveRecord(record,photo){
-  const tx=(await db()).transaction(['records','photos'],'readwrite');const done=complete(tx);
-  if(photo)tx.objectStore('photos').put(photo,record.photoPath);
-  tx.objectStore('records').put(record);await done;
-}
-export async function deleteRecord(record){const tx=(await db()).transaction(['records','photos'],'readwrite');const done=complete(tx);tx.objectStore('records').delete(record.id);tx.objectStore('photos').delete(record.photoPath);await done;}
